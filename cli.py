@@ -129,7 +129,7 @@ def longest_streak():
     else:
         click.echo(f"The habit with the longest streak is '{longest[0]}' with a streak of {longest[1]}.")
 
-@cli.command()
+@cli.command(name="list_by_periodicity")
 @click.argument('periodicity')
 def list_by_periodicity(periodicity):
     """List all habits with the given periodicity (e.g., daily, weekly)."""
