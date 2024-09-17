@@ -163,12 +163,36 @@ def test_get_longest_streak_for_habit_with_broken_streak(predefined_habits):
     assert streak == 5  # Highest streak should still be 5, but current streak is 0
 
 # Test if the streak is reset when a day is skipped for a daily habit
-def test_streak_broken_daily(predefined_habits):
-    habit = predefined_habits[0]  # Assuming this is a daily habit
-    habit.last_completed = (datetime.now() - timedelta(days=2)).strftime('%Y-%m-%d %H:%M:%S')
-    result = mark_habit_as_completed(predefined_habits, "exercise")
-    assert habit.current_streak == 0  # Streak should be reset to 0
-    assert result == "Streak broken, reset to 0 but marked as completed"
+def test_streak_broken_daily():
+    # Create a predefined daily habit with a streak of 5
+    habit = Habit(
+        task="exercise",
+        periodicity="daily",
+        current_streak=5,
+        last_completed=(datetime.now() - timedelta(days=2)).strftime('%Y-%m-%d %H:%M:%S'),  # Two days ago
+        completed_today=False,
+        completed_at="NA",
+        highest_streak=5,
+        creation_date="2024-08-20 07:00:00",
+        completion_history=[
+            {'datetime': '2024-09-10 07:00:00'},
+            {'datetime': '2024-09-11 07:00:00'},
+            {'datetime': '2024-09-12 07:00:00'}
+        ]
+    )
+
+    habits = [habit]  # List containing one habit
+
+    # Mark the habit as completed and check if the streak is broken
+    result = mark_habit_as_completed(habits, "exercise")
+
+    # Check if the streak was reset to 1 after breaking
+    assert habit.current_streak == 1  # The streak should be reset to 1
+    assert result == "Streak broken, reset to 1 but marked as completed"  # Ensure the correct message is returned
+
+
+
+
 
 
 

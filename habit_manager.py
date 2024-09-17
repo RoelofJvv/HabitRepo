@@ -49,28 +49,30 @@ class Habit:
             'creation_date': self.creation_date,
             'completion_history': self.completion_history,
         }
+
 def check_if_streak_broken(habit):
-    """Check if the streak is broken for a habit based on periodicity and last completed date."""
+    """Check if the streak is broken based on the periodicity and last completed date."""
     now = datetime.now()
 
-    # If no last_completed date, the streak cannot be broken
+    # If there's no last completed date, the streak cannot be broken
     if habit.last_completed == "NA":
         return False
 
     last_completed_date = datetime.strptime(habit.last_completed, '%Y-%m-%d %H:%M:%S')
 
     if habit.periodicity == "daily":
+        # If more than 1 day has passed, the streak is broken
         if (now - last_completed_date).days > 1:
-            habit.current_streak = 0  # Streak is broken
+            habit.current_streak = 0
             return True
 
     elif habit.periodicity == "weekly":
+        # If more than 7 days have passed, the streak is broken
         if (now - last_completed_date).days > 7:
-            habit.current_streak = 0  # Streak is broken
+            habit.current_streak = 0
             return True
 
     return False
-
 
 # Function to find a habit by task name
 def find_habit(habits, task):
@@ -111,6 +113,7 @@ def mark_habit_as_completed(habits, task):
     if habit is None:
         return None  # Habit not found
 
+    # Check if the streak is broken
     streak_broken = check_if_streak_broken(habit)
 
     if habit.completed_today:
@@ -118,12 +121,13 @@ def mark_habit_as_completed(habits, task):
 
     habit.mark_as_completed()
 
+    # Return appropriate message if streak was broken
     if streak_broken:
-        return "Streak broken, reset to 0 but marked as completed"
+        habit.current_streak = 1  # Start the streak again after it was broken
+        return "Streak broken, reset to 1 but marked as completed"
     
     return True  # Marked as completed successfully
 
-def is_completed_today(habit):
-    return habit.completed_today
+    return True  # Marked as completed successfully
 
 
