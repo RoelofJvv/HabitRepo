@@ -12,7 +12,7 @@ This is a Python-based command-line interface (CLI) habit-tracking application. 
 - [Troubleshooting](#troubleshooting)
 
 ## Features
-- Add new habits with specific periodicity (e.g., daily, weekly).
+- Add new habits with specific periodicity (daily, weekly).
 - Mark habits as complete for the day.
 - View completion history and analyze the longest streak.
 - Calculate the median time for habit completion.
@@ -38,18 +38,8 @@ This is a Python-based command-line interface (CLI) habit-tracking application. 
    pip install -r requirements.txt
    ```
 
-   If `requirements.txt` is not present, manually install the necessary libraries:
-   ```bash
-   pip install click pytest
-   ```
-
 3. **Prepare the Habit Data**
    Ensure the `habits.json` file is present in the root directory, as it stores your habit data.
-
-   If it does not exist, you can create an empty `habits.json` file:
-   ```bash
-   touch habits.json
-   ```
 
 ## Running the Application
 
@@ -60,7 +50,7 @@ The application is run entirely from the command line. Once installed, you can u
 py cli.py [command] [arguments]
 ```
 
-For example:
+Example:
 ```bash
 py cli.py add "exercise" "daily"
 ```
@@ -152,7 +142,7 @@ The application is fully tested with unit tests. To run the tests, use the follo
 py -m pytest --cov-report term-missing --cov=.
 ```
 
-This will run all the tests and provide a coverage report. Make sure all tests pass before submitting the project.
+This will run all the tests and provide a coverage report.
 
 ## Troubleshooting
 
