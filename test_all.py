@@ -2,7 +2,7 @@ import pytest
 from click.testing import CliRunner
 from unittest.mock import patch, mock_open
 from habit_manager import Habit, find_habit, add_habit, delete_habit, mark_habit_as_completed
-from analytics import list_completion_history, list_all_habits, find_habits_by_periodicity, get_longest_streak_for_habit, calculate_median_completion_time
+from analytics import list_completion_history, list_all_habits, find_habits_by_periodicity, get_longest_streak_for_habit, calculate_median_completion_time, get_longest_streak_of_all_habits
 from data_manager import load_habits_from_file, save_habits_to_file
 from cli import cli
 import json
