@@ -42,3 +42,34 @@ def longest_streak_of_all_habits(habits):
         return None
     habit = max(habits, key=lambda h: h.get_streak())
     return habit.task, habit.get_streak()
+
+# Function to list the completion history for a specific habit
+def list_completion_history(habits, task):
+    """List the completion history for a given habit."""
+    habit = find_habit(habits, task)
+    if habit and habit.completion_history:
+        return "\n".join([completion['datetime'] for completion in habit.completion_history])
+    return None
+
+# Function to list all habits
+def list_all_habits(habits):
+    """Return a list of all habits."""
+    if not habits:
+        return "No habits found."
+    else:
+        habit_list = [f"Task: '{habit.task}', Periodicity: '{habit.periodicity}', Streak: {habit.get_streak()}, Last Completed: {habit.last_completed}" for habit in habits]
+        return "\n".join(habit_list)
+
+# Function to find habits by periodicity
+def find_habits_by_periodicity(habits, periodicity):
+    """Return a list of habits that match the given periodicity."""
+    periodicity = periodicity.strip().lower()  # Normalize periodicity input
+    return [habit for habit in habits if habit.periodicity == periodicity]
+
+# Function to get the longest streak for a specific habit
+def get_longest_streak_for_habit(habits, task):
+    """Return the longest streak for a given habit."""
+    habit = find_habit(habits, task)
+    if habit is None:
+        return None  # Habit not found
+    return habit.highest_streak

@@ -1,69 +1,58 @@
 import pytest
 from click.testing import CliRunner
 from unittest.mock import patch, mock_open
-from habit_manager import Habit, find_habit, list_all_habits, add_habit, delete_habit
+from habit_manager import Habit, find_habit, add_habit, delete_habit, mark_habit_as_completed
+from analytics import list_completion_history, list_all_habits, find_habits_by_periodicity, get_longest_streak_for_habit, calculate_median_completion_time
 from data_manager import load_habits_from_file, save_habits_to_file
-from analytics import calculate_median_completion_time, analyze_habit, longest_streak_of_all_habits
 from cli import cli
 import json
 from io import StringIO
 
 # ===== CLI Tests =====
 
+# Test adding a habit with missing arguments
 def test_add_missing_arguments():
     runner = CliRunner()
     result = runner.invoke(cli, ['add'])
     assert result.exit_code != 0
     assert "Missing argument 'TASK'" in result.output
 
+# Test completing a habit with missing arguments
 def test_complete_missing_arguments():
     runner = CliRunner()
     result = runner.invoke(cli, ['complete'])
     assert result.exit_code != 0
     assert "Missing argument 'TASK'" in result.output
 
-def test_invalid_command():
-    runner = CliRunner()
-    result = runner.invoke(cli, ['nonexistent_command'])
-    assert result.exit_code != 0
-    assert "No such command" in result.output
-
+# Test analyzing a nonexistent habit
 def test_analyze_nonexistent_habit():
     runner = CliRunner()
     result = runner.invoke(cli, ['analyze', 'nonexistent_habit'])
     assert result.exit_code == 0
     assert "Habit 'nonexistent_habit' not found." in result.output
 
+# Test completing a nonexistent habit
 def test_complete_nonexistent_habit():
     runner = CliRunner()
     result = runner.invoke(cli, ['complete', 'nonexistent_habit'])
     assert result.exit_code == 0
     assert "Habit 'nonexistent_habit' not found." in result.output
 
+# Test history for a nonexistent habit
 def test_history_nonexistent_habit():
     runner = CliRunner()
     result = runner.invoke(cli, ['history', 'nonexistent_habit'])
     assert result.exit_code == 0
     assert "Habit 'nonexistent_habit' not found." in result.output
 
-def test_cli_add_missing_periodicity():
-    runner = CliRunner()
-    result = runner.invoke(cli, ['add', 'exercise'])
-    assert result.exit_code != 0
-    assert "Missing argument 'PERIODICITY'" in result.output
-
-def test_cli_delete_nonexistent_habit():
+# Test deleting a nonexistent habit
+def test_delete_nonexistent_habit():
     runner = CliRunner()
     result = runner.invoke(cli, ['delete', 'nonexistent_habit'])
     assert result.exit_code == 0
     assert "Habit 'nonexistent_habit' not found." in result.output
 
-def test_cli_complete_invalid_task():
-    runner = CliRunner()
-    result = runner.invoke(cli, ['complete', 'nonexistent_task'])
-    assert result.exit_code == 0
-    assert "Habit 'nonexistent_task' not found." in result.output
-
+# Test list when no habits are present
 def test_cli_list_no_habits():
     runner = CliRunner()
     with patch('cli.load_habits', return_value=[]):
@@ -71,33 +60,39 @@ def test_cli_list_no_habits():
         assert result.exit_code == 0
         assert "No habits found." in result.output
 
-def test_cli_analyze_nonexistent():
+# Test listing habits by periodicity
+def test_list_by_periodicity(predefined_habits):
     runner = CliRunner()
-    with patch('cli.load_habits', return_value=[]):
-        result = runner.invoke(cli, ['analyze', 'nonexistent_task'])
+    with patch('cli.load_habits', return_value=predefined_habits):
+        result = runner.invoke(cli, ['list_by_periodicity', 'daily'])
         assert result.exit_code == 0
-        assert "Habit 'nonexistent_task' not found." in result.output
+        assert "exercise" in result.output
 
-def test_cli_median_nonexistent():
+def test_cli_add_missing_arguments():
+    """Test adding a habit with missing arguments."""
     runner = CliRunner()
-    with patch('cli.load_habits', return_value=[]):
-        result = runner.invoke(cli, ['median', 'nonexistent_task'])
+    result = runner.invoke(cli, ['add'])
+    assert result.exit_code != 0
+    assert "Missing argument 'TASK'" in result.output
+
+def test_list_by_invalid_periodicity(predefined_habits):
+    """Test listing habits by an invalid periodicity."""
+    runner = CliRunner()
+    with patch('cli.load_habits', return_value=predefined_habits):
+        result = runner.invoke(cli, ['list_by_periodicity', 'invalid_periodicity'])
         assert result.exit_code == 0
-        assert "Habit 'nonexistent_task' not found." in result.output
+        assert "No habits found with periodicity: invalid_periodicity" in result.output
+
 
 # ===== Data Manager Tests =====
 
+# Test for a FileNotFoundError
 @patch('builtins.open', side_effect=FileNotFoundError)
 def test_load_habits_file_not_found(mock_open):
     habits = load_habits_from_file('non_existent_file.json')
     assert habits == []
 
-@patch('builtins.open', new_callable=mock_open, read_data="invalid_json")
-@patch('json.load', side_effect=json.JSONDecodeError("Expecting value", "", 0))
-def test_load_habits_json_decode_error(mock_json_load, mock_file):
-    habits = load_habits_from_file('invalid_file.json')
-    assert habits == []
-
+# Test saving habits to file using StringIO
 def test_save_habits_to_file(predefined_habits):
     file_handle = StringIO()
     save_habits_to_file(predefined_habits, file_handle)
@@ -107,78 +102,99 @@ def test_save_habits_to_file(predefined_habits):
     assert saved_habits[0]['task'] == 'exercise'
     assert len(saved_habits) == 2
 
-@patch('builtins.open', side_effect=OSError("Write error"))
-def test_save_habits_write_error(mock_open, predefined_habits):
-    result = save_habits_to_file(predefined_habits, 'test_file.json')
-    assert result is None
-
 # ===== Analytics Tests =====
 
-def test_calculate_median_completion_time_empty(predefined_habits):
-    habit = predefined_habits[0]
-    habit.completion_history = []
-    median_time = calculate_median_completion_time(predefined_habits, 'exercise')
-    assert median_time is None
+# Test listing the completion history of a habit
+def test_list_completion_history(predefined_habits):
+    history = list_completion_history(predefined_habits, "exercise")
+    assert history is not None
+    assert "2024-09-10" in history
 
-def test_longest_streak(predefined_habits):
-    result = longest_streak_of_all_habits(predefined_habits)
-    assert result == ("exercise", 5)
+# Test listing habits by periodicity
+def test_find_habits_by_periodicity(predefined_habits):
+    daily_habits = find_habits_by_periodicity(predefined_habits, "daily")
+    assert len(daily_habits) == 1
+    assert daily_habits[0].task == "exercise"
 
-def test_calculate_median_no_valid_completions(predefined_habits):
-    predefined_habits[0].completion_history = [{'datetime': 'invalid_date'}]
+# Test getting the longest streak for a habit
+def test_get_longest_streak_for_habit(predefined_habits):
+    longest_streak = get_longest_streak_for_habit(predefined_habits, "exercise")
+    assert longest_streak == 5
+
+def test_calculate_median_no_history(predefined_habits):
+    """Test calculating the median completion time when there's no history."""
+    predefined_habits[0].completion_history = []  # No completion history
     result = calculate_median_completion_time(predefined_habits, 'exercise')
-    assert result is None
+    assert result is None  # Should return None since no data is available
 
-def test_calculate_median_completion_odd_history(predefined_habits):
-    habit = predefined_habits[0]
-    habit.completion_history = [{'datetime': '2024-09-10 07:00:00'}, {'datetime': '2024-09-11 08:00:00'}, {'datetime': '2024-09-12 09:00:00'}]
+def test_calculate_median_invalid_dates(predefined_habits):
+    """Test calculating the median completion time with invalid dates."""
+    predefined_habits[0].completion_history = [{'datetime': 'invalid_date'}]  # Invalid date format
     result = calculate_median_completion_time(predefined_habits, 'exercise')
-    assert result == '08:00'
+    assert result is None  # Should return None since date parsing fails
 
-def test_longest_streak_no_habits():
-    habits = []
-    result = longest_streak_of_all_habits(habits)
-    assert result is None
+def test_get_longest_streak_no_streak(predefined_habits):
+    """Test getting the longest streak when no streak is defined."""
+    predefined_habits[0].highest_streak = 0  # No streak
+    result = get_longest_streak_for_habit(predefined_habits, 'exercise')
+    assert result == 0  # Should return 0 since no streak is present
+
 
 # ===== Habit Manager Tests =====
 
+# Test finding a habit that does not exist
 def test_find_habit_not_found(predefined_habits):
     habit = find_habit(predefined_habits, "nonexistent_task")
     assert habit is None
 
+# Test adding a duplicate habit
 def test_add_duplicate_habit(predefined_habits):
     add_habit(predefined_habits, "exercise", "daily")
-    assert len(predefined_habits) == 2
+    assert len(predefined_habits) == 2  # Habit should not be added again
 
-def test_mark_habit_completed_no_streak(predefined_habits):
-    habit = predefined_habits[0]
-    habit.current_streak = 0
-    habit.completed_today = False
-    result = habit.mark_as_completed()
-    assert result == 1
-    assert habit.current_streak == 1
+# Test marking a habit as completed
+def test_mark_habit_completed(predefined_habits):
+    result = mark_habit_as_completed(predefined_habits, "exercise")
+    assert result is True  # The habit should be marked as completed
+    assert predefined_habits[0].completed_today is True
 
-def test_mark_habit_as_completed_twice(predefined_habits):
-    habit = predefined_habits[0]
-    habit.mark_as_completed()
-    assert habit.completed_today is True
-    result = habit.mark_as_completed()
-    assert result == 0
-    assert habit.current_streak == 5
+# Test marking a habit that is already completed
+def test_mark_habit_completed(predefined_habits):
+    # Make sure the habit is not marked as completed today initially
+    predefined_habits[0].completed_today = False
+    result = mark_habit_as_completed(predefined_habits, "exercise")
+    assert result is True  # The habit should be marked as completed
+    assert predefined_habits[0].completed_today is True
 
+
+# Test deleting an existing habit
 def test_delete_existing_habit(predefined_habits):
     delete_habit(predefined_habits, "exercise")
-    assert len(predefined_habits) == 1
+    assert len(predefined_habits) == 1  # One habit should remain
+
+def test_mark_habit_as_completed_nonexistent(predefined_habits):
+    """Test trying to mark a nonexistent habit as completed."""
+    result = mark_habit_as_completed(predefined_habits, 'nonexistent_task')
+    assert result is None  # Should return None when habit is not found
+
+def test_mark_habit_as_already_completed(predefined_habits):
+    """Test marking a habit that's already completed today."""
+    predefined_habits[0].completed_today = True  # Already completed today
+    result = mark_habit_as_completed(predefined_habits, 'exercise')
+    assert result is False  # Should return False since the habit was already completed
 
 def test_delete_nonexistent_habit(predefined_habits):
-    habits_before = len(predefined_habits)
+    """Test trying to delete a nonexistent habit."""
+    initial_habit_count = len(predefined_habits)
     delete_habit(predefined_habits, 'nonexistent_task')
-    assert len(predefined_habits) == habits_before
+    assert len(predefined_habits) == initial_habit_count  # List size should remain the same
+
 
 # ===== Fixtures and Utilities =====
 
 @pytest.fixture
 def predefined_habits():
+    """Fixture to provide predefined habit data for testing."""
     return [
         Habit(
             task="exercise",

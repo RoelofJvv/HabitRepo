@@ -1,7 +1,7 @@
 import click
-from habit_manager import add_habit, delete_habit, is_completed_today, list_completion_history, mark_habit_as_completed, list_all_habits, find_habit, find_habits_by_periodicity
+from habit_manager import add_habit, delete_habit, find_habit, mark_habit_as_completed
+from analytics import list_completion_history, list_all_habits, find_habits_by_periodicity, get_longest_streak_for_habit
 from data_manager import load_habits_from_file, save_habits_to_file
-from analytics import calculate_median_completion_time, analyze_habit, longest_streak_of_all_habits
 
 # Load habits file (common logic for all commands)
 def load_habits():

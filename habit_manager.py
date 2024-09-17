@@ -88,25 +88,7 @@ def mark_habit_as_completed(habits, task):
     habit.mark_as_completed()
     return True
 
-def list_completion_history(habits, task):
-    habit = find_habit(habits, task)
-    if habit and habit.completion_history:
-        return "\n".join([completion['datetime'] for completion in habit.completion_history])
-    return None
-
-def list_all_habits(habits):
-    if not habits:
-        return "No habits found."
-    else:
-        habit_list = [f"Task: '{habit.task}', Periodicity: '{habit.periodicity}', Streak: {habit.get_streak()}, Last Completed: {habit.last_completed}" for habit in habits]
-        return "\n".join(habit_list)
-
 def is_completed_today(habit):
     return habit.completed_today
 
-# Function to find all habits by periodicity
-def find_habits_by_periodicity(habits, periodicity):
-    """Return a list of habits that match the given periodicity."""
-    periodicity = periodicity.strip().lower()  # Normalize the periodicity input
-    matching_habits = [habit for habit in habits if habit.periodicity == periodicity]
-    return matching_habits
+
