@@ -73,3 +73,22 @@ def get_longest_streak_for_habit(habits, task):
     if habit is None:
         return None  # Habit not found
     return habit.highest_streak
+
+# Function to return the longest run streak of all defined habits
+def get_longest_streak_of_all_habits(habits):
+    """Return the habit with the longest streak."""
+    if not habits:
+        return None, 0  # No habits defined
+
+    longest_streak_habit = max(habits, key=lambda habit: habit.highest_streak)
+    return longest_streak_habit.task, longest_streak_habit.highest_streak
+
+
+# Function to return the longest run streak for a specific habit
+def get_longest_streak_for_habit(habits, task):
+    """Return the longest streak for the given task."""
+    habit = find_habit(habits, task)
+    if habit is None:
+        return None  # Habit not found
+    
+    return habit.highest_streak  # Return the longest streak

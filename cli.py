@@ -142,6 +142,31 @@ def list_by_periodicity(periodicity):
     else:
         click.echo(f"No habits found with periodicity: {periodicity}")
 
+@cli.command()
+def longest_streak_of_all_habits():
+    """Display the habit with the longest current streak among all habits."""
+    habits = load_habits()
+    task, streak = get_longest_streak_of_all_habits(habits)
+
+    if task is None:
+        click.echo("No habits defined.")
+    else:
+        click.echo(f"The habit with the longest streak is '{task}' with a streak of {streak}.")
+
+
+@cli.command()
+@click.argument('task')
+def longest_streak(task):
+    """Display the longest streak for a specific habit."""
+    habits = load_habits()
+    streak = get_longest_streak_for_habit(habits, task)
+
+    if streak is None:
+        click.echo(f"Habit '{task}' not found.")
+    else:
+        click.echo(f"The longest streak for habit '{task}' is {streak}.")
+
+
 
 # Register the commands explicitly
 cli.add_command(add)
@@ -153,6 +178,8 @@ cli.add_command(median)
 cli.add_command(history)
 cli.add_command(longest_streak)
 cli.add_command(list_by_periodicity)
+cli.add_command(longest_streak_of_all_habits)
+cli.add_command(longest_streak)
 
 if __name__ == "__main__":
     cli()

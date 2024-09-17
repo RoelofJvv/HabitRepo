@@ -139,6 +139,22 @@ def test_get_longest_streak_no_streak(predefined_habits):
     result = get_longest_streak_for_habit(predefined_habits, 'exercise')
     assert result == 0  # Should return 0 since no streak is present
 
+# Test longest streak of all habits
+def test_get_longest_streak_of_all_habits(predefined_habits):
+    task, streak = get_longest_streak_of_all_habits(predefined_habits)
+    assert task == "exercise"
+    assert streak == 5
+
+
+# Test longest streak for a specific habit
+def test_get_longest_streak_for_habit(predefined_habits):
+    streak = get_longest_streak_for_habit(predefined_habits, "exercise")
+    assert streak == 5
+
+    streak_nonexistent = get_longest_streak_for_habit(predefined_habits, "nonexistent_habit")
+    assert streak_nonexistent is None
+
+
 
 # ===== Habit Manager Tests =====
 

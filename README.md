@@ -132,8 +132,9 @@ py cli.py add "exercise" "daily"
 ## Analytics
 - **List**: Return a list of all currently tracked habits.
 - **List by Periodicity**: Return a list of all habits with the same periodicity
-- **Longest Ever Streak**: Return the longest run streak of all defined habits
-- **Longest Streak**: Return the longest run streak for a given habit
+- **Longest Current Streak**: Return the longest current streak of all defined habits
+- **Longest Streak Per Habit**: Return the longest run streak for a given habit
+- **Longest Streak**: Return the longest run streak of all defined habits
 - **Median Completion Time**: Calculates and returns the median time of day when the habit is completed, based on past completion history.
 
 ## Testing
