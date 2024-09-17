@@ -167,7 +167,7 @@ This will run all the tests and provide a coverage report. Make sure all tests p
 
 ---
 
-### Sample `requirements.txt` (if needed):
+### `requirements.txt`:
 ```txt
 click==8.0.0
 pytest==7.0.1
