@@ -1,5 +1,5 @@
 import click
-from habit_manager import add_habit, delete_habit, is_completed_today, list_completion_history, mark_habit_as_completed, list_all_habits, find_habit
+from habit_manager import add_habit, delete_habit, is_completed_today, list_completion_history, mark_habit_as_completed, list_all_habits, find_habit, find_habits_by_periodicity
 from data_manager import load_habits_from_file, save_habits_to_file
 from analytics import calculate_median_completion_time, analyze_habit, longest_streak_of_all_habits
 
@@ -129,6 +129,20 @@ def longest_streak():
     else:
         click.echo(f"The habit with the longest streak is '{longest[0]}' with a streak of {longest[1]}.")
 
+@cli.command()
+@click.argument('periodicity')
+def list_by_periodicity(periodicity):
+    """List all habits with the given periodicity (e.g., daily, weekly)."""
+    habits = load_habits()
+    matching_habits = find_habits_by_periodicity(habits, periodicity)
+    
+    if matching_habits:
+        habit_list = [f"Task: '{habit.task}', Periodicity: '{habit.periodicity}', Streak: {habit.get_streak()}" for habit in matching_habits]
+        click.echo("\n".join(habit_list))
+    else:
+        click.echo(f"No habits found with periodicity: {periodicity}")
+
+
 # Register the commands explicitly
 cli.add_command(add)
 cli.add_command(delete)
@@ -138,6 +152,7 @@ cli.add_command(analyze)
 cli.add_command(median)
 cli.add_command(history)
 cli.add_command(longest_streak)
+cli.add_command(list_by_periodicity)
 
 if __name__ == "__main__":
     cli()

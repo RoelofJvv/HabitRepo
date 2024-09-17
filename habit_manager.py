@@ -103,3 +103,10 @@ def list_all_habits(habits):
 
 def is_completed_today(habit):
     return habit.completed_today
+
+# Function to find all habits by periodicity
+def find_habits_by_periodicity(habits, periodicity):
+    """Return a list of habits that match the given periodicity."""
+    periodicity = periodicity.strip().lower()  # Normalize the periodicity input
+    matching_habits = [habit for habit in habits if habit.periodicity == periodicity]
+    return matching_habits
