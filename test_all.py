@@ -7,6 +7,7 @@ from data_manager import load_habits_from_file, save_habits_to_file
 from cli import cli
 import json
 from io import StringIO
+from datetime import datetime, timedelta
 
 # ===== CLI Tests =====
 
@@ -154,7 +155,29 @@ def test_get_longest_streak_for_habit(predefined_habits):
     streak_nonexistent = get_longest_streak_for_habit(predefined_habits, "nonexistent_habit")
     assert streak_nonexistent is None
 
+# Test longest streak for a habit with streak-breaking logic
+def test_get_longest_streak_for_habit_with_broken_streak(predefined_habits):
+    # Break the streak for the exercise habit
+    predefined_habits[0].last_completed = (datetime.now() - timedelta(days=2)).strftime('%Y-%m-%d %H:%M:%S')
+    streak = get_longest_streak_for_habit(predefined_habits, "exercise")
+    assert streak == 5  # Highest streak should still be 5, but current streak is 0
 
+# Test if the streak is reset when a day is skipped for a daily habit
+def test_streak_broken_daily(predefined_habits):
+    habit = predefined_habits[0]  # Assuming this is a daily habit
+    habit.last_completed = (datetime.now() - timedelta(days=2)).strftime('%Y-%m-%d %H:%M:%S')
+    result = mark_habit_as_completed(predefined_habits, "exercise")
+    assert habit.current_streak == 0  # Streak should be reset to 0
+    assert result == "Streak broken, reset to 0 but marked as completed"
+
+
+
+# Test longest streak across all habits with broken streak
+def test_get_longest_streak_of_all_habits_with_broken_streak(predefined_habits):
+    predefined_habits[0].last_completed = (datetime.now() - timedelta(days=2)).strftime('%Y-%m-%d %H:%M:%S')
+    task, streak = get_longest_streak_of_all_habits(predefined_habits)
+    assert task == "exercise"
+    assert streak == 5
 
 # ===== Habit Manager Tests =====
 
@@ -207,10 +230,8 @@ def test_delete_nonexistent_habit(predefined_habits):
 
 
 # ===== Fixtures and Utilities =====
-
 @pytest.fixture
 def predefined_habits():
-    """Fixture to provide predefined habit data for testing."""
     return [
         Habit(
             task="exercise",

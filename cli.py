@@ -1,5 +1,5 @@
 import click
-from habit_manager import add_habit, delete_habit, find_habit, mark_habit_as_completed
+from habit_manager import add_habit, delete_habit, find_habit, mark_habit_as_completed, find_habit
 from analytics import list_completion_history, list_all_habits, find_habits_by_periodicity, get_longest_streak_for_habit, get_longest_streak_of_all_habits
 from data_manager import load_habits_from_file, save_habits_to_file
 
@@ -142,18 +142,6 @@ def list_by_periodicity(periodicity):
     else:
         click.echo(f"No habits found with periodicity: {periodicity}")
 
-@cli.command("longest_streak_of_all_habits")
-def longest_streak_of_all_habits():
-    """Display the habit with the longest current streak among all habits."""
-    habits = load_habits()
-    task, streak = get_longest_streak_of_all_habits(habits)
-
-    if task is None:
-        click.echo("No habits defined.")
-    else:
-        click.echo(f"The habit with the longest streak is '{task}' with a streak of {streak}.")
-
-
 @cli.command("longest_streak")
 @click.argument('task')
 def longest_streak(task):
@@ -165,6 +153,18 @@ def longest_streak(task):
         click.echo(f"Habit '{task}' not found.")
     else:
         click.echo(f"The longest streak for habit '{task}' is {streak}.")
+
+
+@cli.command("longest_streak_of_all_habits")
+def longest_streak_of_all_habits():
+    """Display the habit with the longest current streak among all habits."""
+    habits = load_habits()
+    task, streak = get_longest_streak_of_all_habits(habits)
+
+    if task is None:
+        click.echo("No habits defined.")
+    else:
+        click.echo(f"The habit with the longest streak is '{task}' with a streak of {streak}.")
 
 
 

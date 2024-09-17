@@ -1,8 +1,8 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 
 class Habit:
     def __init__(self, task, periodicity, current_streak, last_completed, completed_today, completed_at, highest_streak, creation_date, completion_history=None):
-        self.task = task.strip().lower()  # Normalize to lowercase
+        self.task = task.strip().lower()
         self.periodicity = periodicity.strip().lower()
         self.current_streak = int(current_streak)
         self.last_completed = last_completed
@@ -13,13 +13,18 @@ class Habit:
         self.completion_history = completion_history if completion_history is not None else []
 
     def get_streak(self):
+        """Return the current streak, after checking if the streak is broken."""
+        check_if_streak_broken(self)  # Check if the streak is broken before returning
         return self.current_streak
 
     def mark_as_completed(self):
+        """Mark the habit as completed for the day."""
         now = datetime.now()
-        if self.completed_today:
-            return 0
 
+        if self.completed_today:
+            return 0  # Already completed today
+
+        # Update the streak and completion history
         self.last_completed = now.strftime('%Y-%m-%d %H:%M:%S')
         self.completed_today = True
         self.completed_at = now.strftime('%Y-%m-%d %H:%M:%S')
@@ -28,8 +33,9 @@ class Habit:
         if self.current_streak > self.highest_streak:
             self.highest_streak = self.current_streak
 
+        # Add the completion time to the completion history
         self.completion_history.append({'datetime': self.completed_at})
-        return 1
+        return 1  # Completed successfully
 
     def to_dict(self):
         return {
@@ -43,11 +49,32 @@ class Habit:
             'creation_date': self.creation_date,
             'completion_history': self.completion_history,
         }
+def check_if_streak_broken(habit):
+    """Check if the streak is broken for a habit based on periodicity and last completed date."""
+    now = datetime.now()
+
+    # If no last_completed date, the streak cannot be broken
+    if habit.last_completed == "NA":
+        return False
+
+    last_completed_date = datetime.strptime(habit.last_completed, '%Y-%m-%d %H:%M:%S')
+
+    if habit.periodicity == "daily":
+        if (now - last_completed_date).days > 1:
+            habit.current_streak = 0  # Streak is broken
+            return True
+
+    elif habit.periodicity == "weekly":
+        if (now - last_completed_date).days > 7:
+            habit.current_streak = 0  # Streak is broken
+            return True
+
+    return False
+
 
 # Function to find a habit by task name
 def find_habit(habits, task):
-    """Find a habit by task name."""
-    task = task.strip().lower()  # Normalize to lowercase
+    task = task.strip().lower()
     for habit in habits:
         if habit.task == task:
             return habit
@@ -82,11 +109,19 @@ def delete_habit(habits, task):
 def mark_habit_as_completed(habits, task):
     habit = find_habit(habits, task)
     if habit is None:
-        return None
+        return None  # Habit not found
+
+    streak_broken = check_if_streak_broken(habit)
+
     if habit.completed_today:
-        return False
+        return False  # Already completed today
+
     habit.mark_as_completed()
-    return True
+
+    if streak_broken:
+        return "Streak broken, reset to 0 but marked as completed"
+    
+    return True  # Marked as completed successfully
 
 def is_completed_today(habit):
     return habit.completed_today
