@@ -143,7 +143,7 @@ py cli.py add "exercise" "daily"
 The application is fully tested with unit tests. To run the tests, use the following command:
 
 ```bash
-py -m pytest --cov-report term-missing --cov=.
+py -m pytest --cov=. --cov-report=term
 ```
 
 This will run all the tests and provide a coverage report.
