@@ -117,4 +117,16 @@ def mark_habit_as_completed(habits, task):
     
     return True  
 
+def analyze_habit(habits, task):
+    """Analyze the details of a specific habit."""
+    habit = find_habit(habits, task)
+    if habit:
+        task = habit.task
+        periodicity = habit.periodicity
+        current_streak = habit.current_streak
+        highest_streak = habit.highest_streak
+        return task, periodicity, current_streak, highest_streak
+    return None, None, None, None
+
+
 

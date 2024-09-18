@@ -1,5 +1,5 @@
 import click
-from habit_manager import add_habit, delete_habit, find_habit, mark_habit_as_completed, find_habit
+from habit_manager import add_habit, delete_habit, find_habit, mark_habit_as_completed, find_habit, analyze_habit
 from analytics import list_completion_history, list_all_habits, find_habits_by_periodicity, get_longest_streak_for_habit, get_longest_streak_of_all_habits
 from data_manager import load_habits_from_file, save_habits_to_file
 
