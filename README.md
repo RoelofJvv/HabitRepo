@@ -47,7 +47,9 @@ This is a Python-based command-line interface (CLI) habit-tracking application. 
 The application is run entirely from the command line. Once installed, you can use the following commands:
 
 ```bash
-py cli.py [command] [arguments]
+py cli.py [command] [arguments] (windows 11)
+or
+python cli.py [command] [arguments] (windows 10)
 ```
 
 Example:
