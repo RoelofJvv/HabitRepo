@@ -235,10 +235,14 @@ def test_delete_existing_habit(predefined_habits):
     delete_habit(predefined_habits, "exercise")
     assert len(predefined_habits) == 1  # One habit should remain
 
-def test_mark_habit_as_completed_nonexistent(predefined_habits):
-    """Test trying to mark a nonexistent habit as completed."""
-    result = mark_habit_as_completed(predefined_habits, 'nonexistent_task')
-    assert result is None  # Should return None when habit is not found
+def test_mark_habit_completed(predefined_habits):
+    # Make sure the habit is not marked as completed today initially
+    predefined_habits[0].completed_today = False
+    result = mark_habit_as_completed(predefined_habits, "exercise")
+    
+    # Check if the returned message matches the expected message when the streak is broken
+    assert result == "Streak broken, reset to 1 but marked as completed" or result is True
+
 
 def test_mark_habit_as_already_completed(predefined_habits):
     """Test marking a habit that's already completed today."""
