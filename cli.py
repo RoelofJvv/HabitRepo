@@ -3,7 +3,6 @@ from habit_manager import add_habit, delete_habit, find_habit, mark_habit_as_com
 from analytics import list_completion_history, list_all_habits, find_habits_by_periodicity, get_longest_streak_for_habit, get_longest_streak_of_all_habits
 from data_manager import load_habits_from_file, save_habits_to_file
 
-# Load habits file (common logic for all commands)
 def load_habits():
     return load_habits_from_file('habits.json')
 
@@ -12,19 +11,18 @@ def save_habits(habits):
 
 @click.group()
 def cli():
-    """A command-line interface for managing habits."""
+    """A command-line interface for managing habits"""
     pass
 
 @click.command(name="add")
 @click.argument('task')
 @click.argument('periodicity')
 def add(task, periodicity):
-    """Add a new habit with TASK and PERIODICITY. Check if the habit already exists."""
+    """Add a new habit with TASK and PERIODICITY"""
     habits = load_habits()
 
-    # Check if habit already exists
     if find_habit(habits, task):
-        click.echo(f"Habit '{task}' already exists. Cannot add a duplicate.")
+        click.echo(f"Habit '{task}' already exists. Cannot add a duplicate")
     else:
         add_habit(habits, task, periodicity)
         save_habits(habits)
@@ -33,7 +31,7 @@ def add(task, periodicity):
 @click.command(name="delete")
 @click.argument('task')
 def delete(task):
-    """Delete a habit with the given TASK name."""
+    """Delete a habit with the given TASK name"""
     habits = load_habits()
     habit = find_habit(habits, task)
 
@@ -42,7 +40,7 @@ def delete(task):
         save_habits(habits)
         click.echo(f"Deleted habit: {task}")
     else:
-        click.echo(f"Habit '{task}' not found.")
+        click.echo(f"Habit '{task}' not found")
 
 @click.command(name="list")
 def list_command():
@@ -54,31 +52,30 @@ def list_command():
 @click.command(name="complete")
 @click.argument('task')
 def complete(task):
-    """Mark a habit with TASK as completed. Check if the habit has already been completed today."""
+    """Mark a habit with TASK as completed"""
     habits = load_habits()
     habit = find_habit(habits, task)
 
     if habit is None:
-        click.echo(f"Habit '{task}' not found.")
+        click.echo(f"Habit '{task}' not found")
         return
 
-    # Check if habit has already been completed today
     if is_completed_today(habit):
-        click.echo(f"Habit '{task}' has already been completed today.")
+        click.echo(f"Habit '{task}' has already been completed today")
     else:
         mark_habit_as_completed(habits, task)
         save_habits(habits)
-        click.echo(f"Marked habit '{task}' as completed.")
+        click.echo(f"Marked habit '{task}' as completed")
 
 @click.command(name="analyze")
 @click.argument('task')
 def analyze(task):
-    """Analyze a specific habit with TASK name."""
+    """Analyze a specific habit with TASK name"""
     habits = load_habits()
     habit = find_habit(habits, task)
 
     if habit is None:
-        click.echo(f"Habit '{task}' not found.")
+        click.echo(f"Habit '{task}' not found")
         return
 
     task, periodicity, current_streak, highest_streak = analyze_habit(habits, task)
@@ -87,52 +84,52 @@ def analyze(task):
 @click.command(name="median")
 @click.argument('task')
 def median(task):
-    """Calculate the median time of the completion of a TASK."""
+    """Calculate the median time of the completion of a TASK"""
     habits = load_habits()
     habit = find_habit(habits, task)
 
     if habit is None:
-        click.echo(f"Habit '{task}' not found.")
+        click.echo(f"Habit '{task}' not found")
         return
 
     median = calculate_median_completion_time(habits, task)
     if median is None:
-        click.echo(f"No completion records for habit '{task}'.")
+        click.echo(f"No completion records for habit '{task}'")
     else:
-        click.echo(f"Habit '{task}' is completed at a median time of '{median}'.")
+        click.echo(f"Habit '{task}' is completed at a median time of '{median}'")
 
 @click.command(name="history")
 @click.argument('task')
 def history(task):
-    """Return the list of completion dates of a TASK."""
+    """Return the list of completion dates of a TASK"""
     habits = load_habits()
     habit = find_habit(habits, task)
 
     if habit is None:
-        click.echo(f"Habit '{task}' not found.")
+        click.echo(f"Habit '{task}' not found")
         return
 
     history_list = list_completion_history(habits, task)
     if history_list is None:
-        click.echo(f"There is no history of completion for the habit {task}.")
+        click.echo(f"There is no history of completion for the habit {task}")
     else:
         click.echo(f"The completion history for {task}: \n{history_list}")
 
 @click.command(name="longest_streak")
 def longest_streak():
-    """Display the habit with the longest current streak."""
+    """Display the habit with the longest current streak"""
     habits = load_habits()
     longest = longest_streak_of_all_habits(habits)
 
     if longest is None:
-        click.echo("No habits found.")
+        click.echo("No habits found")
     else:
-        click.echo(f"The habit with the longest streak is '{longest[0]}' with a streak of {longest[1]}.")
+        click.echo(f"The habit with the longest streak is '{longest[0]}' with a streak of {longest[1]}")
 
 @cli.command(name="list_by_periodicity")
 @click.argument('periodicity')
 def list_by_periodicity(periodicity):
-    """List all habits with the given periodicity (e.g., daily, weekly)."""
+    """List all habits with the given periodicity (daily or weekly)"""
     habits = load_habits()
     matching_habits = find_habits_by_periodicity(habits, periodicity)
     
@@ -145,30 +142,27 @@ def list_by_periodicity(periodicity):
 @cli.command("longest_streak")
 @click.argument('task')
 def longest_streak(task):
-    """Display the longest streak for a specific habit."""
+    """Display the longest streak for a specific habit"""
     habits = load_habits()
     streak = get_longest_streak_for_habit(habits, task)
 
     if streak is None:
-        click.echo(f"Habit '{task}' not found.")
+        click.echo(f"Habit '{task}' not found")
     else:
-        click.echo(f"The longest streak for habit '{task}' is {streak}.")
+        click.echo(f"The longest streak for habit '{task}' is {streak}")
 
 
 @cli.command("longest_streak_of_all_habits")
 def longest_streak_of_all_habits():
-    """Display the habit with the longest current streak among all habits."""
+    """Display the habit with the longest current streak among all habits"""
     habits = load_habits()
     task, streak = get_longest_streak_of_all_habits(habits)
 
     if task is None:
-        click.echo("No habits defined.")
+        click.echo("No habits defined")
     else:
-        click.echo(f"The habit with the longest streak is '{task}' with a streak of {streak}.")
+        click.echo(f"The habit with the longest streak is '{task}' with a streak of {streak}")
 
-
-
-# Register the commands explicitly
 cli.add_command(add)
 cli.add_command(delete)
 cli.add_command(list_command)

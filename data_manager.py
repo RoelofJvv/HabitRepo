@@ -3,7 +3,6 @@ from habit_manager import Habit
 import logging
 import os
 
-# Set up basic configuration for logging
 logging.basicConfig(level=logging.ERROR, format='%(asctime)s - %(levelname)s - %(message)s')
 
 def load_habits_from_file(filename: str) -> list:

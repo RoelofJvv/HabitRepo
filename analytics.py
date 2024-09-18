@@ -3,7 +3,7 @@ from datetime import datetime
 from habit_manager import find_habit, check_if_streak_broken
 
 def calculate_median_completion_time(habits, task):
-    """Calculate the median completion time of a specific habit."""
+    """Calculate the median completion time of a specific habit"""
     habit = find_habit(habits, task)
     if habit is None or not habit.completion_history:
         return None
@@ -14,7 +14,6 @@ def calculate_median_completion_time(habits, task):
             time = datetime.strptime(completion['datetime'], '%Y-%m-%d %H:%M:%S')
             completion_times.append(time)
         except ValueError:
-            # Skip invalid date formats
             continue
     
     if not completion_times:
@@ -43,41 +42,37 @@ def longest_streak_of_all_habits(habits):
     habit = max(habits, key=lambda h: h.get_streak())
     return habit.task, habit.get_streak()
 
-# Function to list the completion history for a specific habit
 def list_completion_history(habits, task):
-    """List the completion history for a given habit."""
+    """List the completion history for a given habit"""
     habit = find_habit(habits, task)
     if habit and habit.completion_history:
         return "\n".join([completion['datetime'] for completion in habit.completion_history])
     return None
 
-# Function to list all habits
 def list_all_habits(habits):
-    """Return a list of all habits."""
+    """Return a list of all habits"""
     if not habits:
         return "No habits found."
     else:
         habit_list = [f"Task: '{habit.task}', Periodicity: '{habit.periodicity}', Streak: {habit.get_streak()}, Last Completed: {habit.last_completed}" for habit in habits]
         return "\n".join(habit_list)
 
-# Function to find habits by periodicity
 def find_habits_by_periodicity(habits, periodicity):
-    """Return a list of habits that match the given periodicity."""
-    periodicity = periodicity.strip().lower()  # Normalize periodicity input
+    """Return a list of habits that match the given periodicity"""
+    periodicity = periodicity.strip().lower() 
     return [habit for habit in habits if habit.periodicity == periodicity]
 
-# Function to get the longest streak for a specific habit
 def get_longest_streak_for_habit(habits, task):
     """Return the longest streak for a given habit."""
     habit = find_habit(habits, task)
     if habit is None:
-        return None  # Habit not found
+        return None
     return habit.highest_streak
 
 def get_longest_streak_of_all_habits(habits):
-    """Return the habit with the longest streak."""
+    """Return the habit with the longest streak"""
     if not habits:
-        return None, 0  # No habits defined
+        return None, 0
 
     for habit in habits:
         check_if_streak_broken(habit)
@@ -87,10 +82,10 @@ def get_longest_streak_of_all_habits(habits):
 
 
 def get_longest_streak_for_habit(habits, task):
-    """Return the longest streak for the given task."""
+    """Return the longest streak for the given task"""
     habit = find_habit(habits, task)
     if habit is None:
-        return None  # Habit not found
+        return None
 
     check_if_streak_broken(habit)
     return habit.highest_streak
